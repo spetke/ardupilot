@@ -2,12 +2,14 @@
 
 #include "AP_Airspeed_config.h"
 
-#if AP_AIRSPEED_NMEA_ENABLED
-
-#include "AP_Airspeed_Backend.h"
+#if AP_AIRSPEED_VECTOR_ENABLED
 #include <AP_HAL/AP_HAL.h>
+#include <AP_HAL/utility/OwnPtr.h>
+#include <AP_HAL/I2CDevice.h>
+#include <utility>
+#include "AP_Airspeed_Backend.h"
 
-class AP_Airspeed_NMEA : public AP_Airspeed_Backend
+class AP_Airspeed_VECTOR : public AP_Airspeed_Backend
 {
 public:
 
@@ -22,46 +24,18 @@ public:
     // read the from the sensor
     bool get_airspeed(float &airspeed) override;
 
-    // return the current temperature in degrees C
-    bool get_temperature(float &temperature) override;
-
-
 private:
-    // pointer to serial uart
-    AP_HAL::UARTDriver *_uart = nullptr; 
+    void timer();
+    bool confirm_sensor_id(void);
+    float temp_sum;
+    float press_sum;
+    float last_pressure;
+    float last_temperature;
+    uint32_t press_count;
+    uint32_t temp_count;
+    uint32_t last_sample_ms;
 
-    // add a single character to the buffer and attempt to decode
-    // returns true if a complete sentence was successfully decoded
-    // distance should be pulled directly from _distance_m member
-    bool decode(char c);
-
-    // decode the just-completed term
-    // returns true if new sentence has just passed checksum test and is validated
-    bool decode_latest_term();
-
-    // enum for handled messages
-    enum sentence_types : uint8_t {
-        TPYE_MTW = 0,
-        TYPE_VHW,
-    };
-
-
-    // message decoding related members
-    char _term[15];                         // buffer for the current term within the current sentence
-    uint8_t _term_offset;                   // offset within the _term buffer where the next character should be placed
-    uint8_t _term_number;                   // term index within the current sentence
-    float _speed;                           // speed in m/s
-    float _temp;                            // temp in deg c
-    uint8_t _checksum;                      // checksum accumulator
-    bool _term_is_checksum;                 // current term is the checksum
-    bool _sentence_done;                    // has the current term already been decoded
-    bool _sentence_valid;                   // is the decodeing valid so far
-    sentence_types _sentence_type;          // the sentence type currently being processed
-
-    // Store the temp ready for a temp request
-    float _temp_sum;
-    uint16_t _temp_count;
-
+    AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev;
     // store last sent speed and temp as update rate is slow
     float _last_temp;
     float _last_speed;
@@ -70,4 +44,4 @@ private:
     uint32_t _last_update_ms;
 };
 
-#endif  // AP_AIRSPEED_NMEA_ENABLED
+#endif  // AP_AIRSPEED_VECTOR_ENABLED
