@@ -35,21 +35,12 @@ public:
     bool get_airspeed(float &airspeed) override;
 
 
-    // return the current differential_pressure in Pascal
-    bool get_differential_pressure(float &_pressure) override;
-
-    // return the current temperature in degrees C, if available
-    bool get_temperature(float &_temperature) override;
 
 private:
     void timer();
-    bool confirm_sensor_id(void);
-    float temp_sum;
-    float press_sum;
-    float last_pressure;
-    float last_temperature;
-    uint32_t press_count;
-    uint32_t temp_count;
+    float speed_sum;
+    float last_speed;
+    uint32_t speed_count;
     uint32_t last_sample_ms;
 
     AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev;

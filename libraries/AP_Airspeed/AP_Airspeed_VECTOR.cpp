@@ -24,6 +24,7 @@ extern const AP_HAL::HAL &hal;
 
 #define VECTOR_I2C_ADDR_1      0x28
 #define VECTOR_I2C_ADDR_2      0x40
+#define REG_SPEED_DATA         0x28
 #define REG_CMD                0x30
 #define REG_PRESS_DATA         0x06
 #define REG_TEMP_DATA          0x09
@@ -49,10 +50,6 @@ bool AP_Airspeed_VECTOR::init()
         dev->set_speed(AP_HAL::Device::SPEED_HIGH);
         dev->set_retries(2);
 
-        if (!confirm_sensor_id()) {
-            continue;
-        }
-
         dev->set_device_type(uint8_t(DevType::VECTOR));
         set_bus_id(dev->get_bus_id());
 
@@ -65,35 +62,9 @@ bool AP_Airspeed_VECTOR::init()
     return false;
 }
 
-/*
-  this sensor has an unusual whoami scheme. The part_id is changeable
-  via another register. We check the sensor by looking for the
-  expected behaviour
-*/
-bool AP_Airspeed_VECTOR::confirm_sensor_id(void)
-{
-    uint8_t part_id;
-    if (!dev->read_registers(REG_PART_ID_SET, &part_id, 1) ||
-        ( (part_id != REG_WHOAMI_DEFAULT_ID) && (part_id != REG_WHOAMI_RECHECK_ID) ) ) {
-        return false;
-    }
-    if (!dev->write_register(REG_PART_ID_SET, REG_WHOAMI_RECHECK_ID)) {
-        return false;
-    }
-    if (!dev->read_registers(REG_PART_ID, &part_id, 1) ||
-        part_id != REG_WHOAMI_RECHECK_ID) {
-        return false;
-    }
-    return true;
-}
-
-
 // read the data from the sensor
 void AP_Airspeed_VECTOR::timer()
 {
-    // request a new measurement cycle begin
-    dev->write_register(REG_CMD, CMD_MEASURE);
-
     uint8_t status;
     if (!dev->read_registers(REG_CMD, &status, 1) ||
         (status & REG_SENSOR_READY) == 0) {
@@ -102,38 +73,27 @@ void AP_Airspeed_VECTOR::timer()
     }
 
     // read pressure and temperature as one block
-    uint8_t data[5];
-    if (!dev->read_registers(REG_PRESS_DATA, data, sizeof(data))) {
+    uint8_t data[2];
+    if (!dev->read_registers(REG_SPEED_DATA, data, sizeof(data))) {
         return;
     }
 
-    // ADC pressure is signed 24 bit
-    int32_t press = (data[0]<<24) | (data[1]<<16) | (data[2]<<8);
-
+    // speed  is signed 16 bit
+    int32_t speed =  (data[0]<<8) | data[1];
     // convert back to 24 bit
-    press >>= 8;
-
-    // k is a shift based on the pressure range of the device. See
-    // table in the datasheet
-    constexpr uint8_t k = 7;
-    constexpr float press_scale = 1.0 / (1U<<k);
-
-    // temperature is 16 bit signed in units of 1/256 C
-    const int16_t temp = (data[3]<<8) | data[4];
-    constexpr float temp_scale = 1.0 / 256;
+   // speed >>= 8;
 
     WITH_SEMAPHORE(sem);
-    press_sum += press * press_scale;
-    temp_sum += temp * temp_scale;
-    press_count++;
-    temp_count++;
+    speed_sum += speed;
+    speed_count++;
+
 
     last_sample_ms = AP_HAL::millis();
 }
 
 
-// return the current differential_pressure in Pascal
-bool AP_Airspeed_VECTOR::get_differential_pressure(float &pressure)
+// return the current airspeed in m/s
+bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
 {
     WITH_SEMAPHORE(sem);
 
@@ -141,37 +101,18 @@ bool AP_Airspeed_VECTOR::get_differential_pressure(float &pressure)
         return false;
     }
 
-    if (press_count == 0) {
-        pressure = last_pressure;
+    if (speed_count == 0) {
+        airspeed = last_speed;
         return true;
     }
 
-    last_pressure = pressure = press_sum / press_count;
+    last_speed = airspeed = speed_sum / speed_count;
 
-    press_count = 0;
-    press_sum = 0;
+    speed_count = 0;
+    speed_sum = 0;
 
     return true;
 }
 
-// return the current temperature in degrees C, if available
-bool AP_Airspeed_VECTOR::get_temperature(float &temperature)
-{
-    WITH_SEMAPHORE(sem);
-
-    if (AP_HAL::millis() - last_sample_ms > 100) {
-        return false;
-    }
-    if (temp_count == 0) {
-        temperature = last_temperature;
-        return true;
-    }
-
-    last_temperature = temperature = temp_sum / temp_count;
-    temp_count = 0;
-    temp_sum = 0;
-
-    return true;
-}
 
 #endif
