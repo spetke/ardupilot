@@ -174,25 +174,27 @@ public:
         REPORT_OFFSET                                         = (1<<4),   // report offset cal to GCS
     };
 
-    enum airspeed_type {
-        TYPE_NONE=0,
-        TYPE_I2C_MS4525=1,
-        TYPE_ANALOG=2,
-        TYPE_I2C_MS5525=3,
-        TYPE_I2C_MS5525_ADDRESS_1=4,
-        TYPE_I2C_MS5525_ADDRESS_2=5,
-        TYPE_I2C_SDP3X=6,
-        TYPE_I2C_DLVR_5IN=7,
-        TYPE_UAVCAN=8,
-        TYPE_I2C_DLVR_10IN=9,
-        TYPE_I2C_DLVR_20IN=10,
-        TYPE_I2C_DLVR_30IN=11,
-        TYPE_I2C_DLVR_60IN=12,
-        TYPE_NMEA_WATER=13,
-        TYPE_MSP=14,
-        TYPE_I2C_ASP5033=15,
-        TYPE_EXTERNAL=16,
-        TYPE_SITL=100,
+    enum airspeed_type
+    {
+        TYPE_NONE = 0,
+        TYPE_I2C_MS4525 = 1,
+        TYPE_ANALOG = 2,
+        TYPE_I2C_MS5525 = 3,
+        TYPE_I2C_MS5525_ADDRESS_1 = 4,
+        TYPE_I2C_MS5525_ADDRESS_2 = 5,
+        TYPE_I2C_SDP3X = 6,
+        TYPE_I2C_DLVR_5IN = 7,
+        TYPE_UAVCAN = 8,
+        TYPE_I2C_DLVR_10IN = 9,
+        TYPE_I2C_DLVR_20IN = 10,
+        TYPE_I2C_DLVR_30IN = 11,
+        TYPE_I2C_DLVR_60IN = 12,
+        TYPE_NMEA_WATER = 13,
+        TYPE_MSP = 14,
+        TYPE_I2C_ASP5033 = 15,
+        TYPE_EXTERNAL = 16,
+        TYPE_VECTOR = 17,
+        TYPE_SITL = 100,
     };
 
     // get current primary sensor
