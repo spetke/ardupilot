@@ -22,7 +22,10 @@
   backend driver for airspeed from I2C
  */
 #include "AP_Airspeed_Backend.h"
-
+#include <AP_HAL/AP_HAL.h>
+#include <AP_HAL/utility/OwnPtr.h>
+#include <AP_HAL/I2CDevice.h>
+#include <utility>
 class AP_Airspeed_VECTOR : public AP_Airspeed_Backend
 {
 public:
