@@ -164,6 +164,28 @@ bool AP_Airspeed_VECTOR::get_differential_pressure(float &pressure)
 
     return true;
 }
+bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
+{
+    WITH_SEMAPHORE(sem);
+
+    if (AP_HAL::millis() - last_sample_ms > 100)
+    {
+        return false;
+    }
+
+    if (press_count == 0)
+    {
+        airspeed = last_pressure;
+        return true;
+    }
+
+    last_pressure = airspeed = press_sum / press_count;
+
+    press_count = 0;
+    press_sum = 0;
+
+    return true;
+}
 
 // return the current temperature in degrees C, if available
 bool AP_Airspeed_VECTOR::get_temperature(float &temperature)

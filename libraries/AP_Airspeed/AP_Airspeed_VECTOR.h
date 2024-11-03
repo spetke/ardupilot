@@ -34,6 +34,11 @@ public:
 
   // return the current temperature in degrees C, if available
   bool get_temperature(float &_temperature) override;
+  
+  bool has_airspeed() override { return true; }
+
+  // read the from the sensor
+  bool get_airspeed(float &_airspeed) override;
 
 private:
   void timer();
