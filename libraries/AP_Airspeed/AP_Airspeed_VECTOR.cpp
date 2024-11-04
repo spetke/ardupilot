@@ -86,52 +86,22 @@ void AP_Airspeed_VECTOR::timer()
     }
 
     // ADC pressure is signed 24 bit
-    int32_t press = (data[0] << 24) | (data[1] << 16) | (data[2] << 8);
+    //int32_t press = (data[0] << 24) | (data[1] << 16) | (data[2] << 8);
 
     // convert back to 24 bit
-    press >>= 8;
-
-    // k is a shift based on the pressure range of the device. See
-    // table in the datasheet
-    constexpr uint8_t k = 7;
-    constexpr float press_scale = 1.0 / (1U << k);
+    //press >>= 8;
 
     // temperature is 16 bit signed in units of 1/256 C
     const int16_t temp = (data[3] << 8) | data[4];
     constexpr float temp_scale = 1.0 / 256;
 
     WITH_SEMAPHORE(sem);
-    press_sum += press * press_scale;
     temp_sum += temp * temp_scale;
-    press_count++;
     temp_count++;
 
     last_sample_ms = AP_HAL::millis();
 }
 
-// return the current differential_pressure in Pascal
-bool AP_Airspeed_VECTOR::get_differential_pressure(float &pressure)
-{
-    WITH_SEMAPHORE(sem);
-
-    if (AP_HAL::millis() - last_sample_ms > 100)
-    {
-        return false;
-    }
-
-    if (press_count == 0)
-    {
-        pressure = last_pressure;
-        return true;
-    }
-
-    last_pressure = pressure = press_sum / press_count;
-
-    press_count = 0;
-    press_sum = 0;
-
-    return true;
-}
 bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
 {
     WITH_SEMAPHORE(sem);
@@ -141,16 +111,16 @@ bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
         return false;
     }
 
-    if (press_count == 0)
+    if (speed_count == 0)
     {
-        airspeed = last_pressure;
+        airspeed = last_speed;
         return true;
     }
 
-    last_pressure = airspeed = press_sum / press_count;
+    last_speed = airspeed = speed_sum / speed_count;
 
-    press_count = 0;
-    press_sum = 0;
+    speed_count = 0;
+    speed_sum = 0;
 
     return true;
 }

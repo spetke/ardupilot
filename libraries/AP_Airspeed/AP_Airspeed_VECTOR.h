@@ -28,10 +28,6 @@ class AP_Airspeed_VECTOR : public AP_Airspeed_Backend
 public:
   using AP_Airspeed_Backend::AP_Airspeed_Backend;
   bool init() override;
-
-  // return the current differential_pressure in Pascal
-  bool get_differential_pressure(float &_pressure) override;
-
   // return the current temperature in degrees C, if available
   bool get_temperature(float &_temperature) override;
   
@@ -43,13 +39,12 @@ public:
 private:
   void timer();
   float temp_sum;
-  float press_sum;
-  float last_pressure;
   float last_temperature;
-  uint32_t press_count;
   uint32_t temp_count;
   uint32_t last_sample_ms;
-
+  float speed_sum;
+  float last_speed;
+  uint32_t speed_count;
   AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev;
 };
 
