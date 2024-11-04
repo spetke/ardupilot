@@ -59,7 +59,7 @@ bool AP_Airspeed_VECTOR::init()
             continue;
         }
 
-        dev->set_device_type(uint8_t(DevType::ASP5033));
+        dev->set_device_type(uint8_t(DevType::VECTOR));
         set_bus_id(dev->get_bus_id());
 
         dev->register_periodic_callback(1000000UL / 80U,
