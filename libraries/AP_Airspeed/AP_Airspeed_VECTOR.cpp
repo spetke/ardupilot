@@ -53,12 +53,6 @@ bool AP_Airspeed_VECTOR::init()
         WITH_SEMAPHORE(dev->get_semaphore());
         dev->set_speed(AP_HAL::Device::SPEED_HIGH);
         dev->set_retries(2);
-
-        if (!confirm_sensor_id())
-        {
-            continue;
-        }
-
         dev->set_device_type(uint8_t(DevType::VECTOR));
         set_bus_id(dev->get_bus_id());
 
@@ -70,32 +64,6 @@ bool AP_Airspeed_VECTOR::init()
     // not found
     return false;
 }
-
-/*
-  this sensor has an unusual whoami scheme. The part_id is changeable
-  via another register. We check the sensor by looking for the
-  expected behaviour
-*/
-bool AP_Airspeed_VECTOR::confirm_sensor_id(void)
-{
-    uint8_t part_id;
-    if (!dev->read_registers(REG_PART_ID_SET, &part_id, 1) ||
-        ((part_id != REG_WHOAMI_DEFAULT_ID) && (part_id != REG_WHOAMI_RECHECK_ID)))
-    {
-        return false;
-    }
-    if (!dev->write_register(REG_PART_ID_SET, REG_WHOAMI_RECHECK_ID))
-    {
-        return false;
-    }
-    if (!dev->read_registers(REG_PART_ID, &part_id, 1) ||
-        part_id != REG_WHOAMI_RECHECK_ID)
-    {
-        return false;
-    }
-    return true;
-}
-
 // read the data from the sensor
 void AP_Airspeed_VECTOR::timer()
 {

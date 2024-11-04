@@ -42,7 +42,6 @@ public:
 
 private:
   void timer();
-  bool confirm_sensor_id(void);
   float temp_sum;
   float press_sum;
   float last_pressure;
