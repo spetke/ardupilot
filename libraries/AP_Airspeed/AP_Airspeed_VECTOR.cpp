@@ -118,27 +118,12 @@ bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
 
     return true;
 }
-
-// return the current temperature in degrees C, if available
+//This has to be implemnted to fullfill interface for some reason
 bool AP_Airspeed_VECTOR::get_temperature(float &temperature)
 {
     WITH_SEMAPHORE(sem);
 
-    if (AP_HAL::millis() - last_sample_ms > 100)
-    {
-        return false;
-    }
-    if (temp_count == 0)
-    {
-        temperature = last_temperature;
-        return true;
-    }
-
-    last_temperature = temperature = temp_sum / temp_count;
-    temp_count = 0;
-    temp_sum = 0;
-
-    return true;
+return false;
 }
 
 #endif
