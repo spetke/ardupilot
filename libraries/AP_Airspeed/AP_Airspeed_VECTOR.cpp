@@ -55,7 +55,7 @@ bool AP_Airspeed_VECTOR::init()
         WITH_SEMAPHORE(dev->get_semaphore());
         dev->set_speed(AP_HAL::Device::SPEED_HIGH);
         dev->set_retries(2);
-        //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "MS5525[%u]: Found on bus %u addr 0x%02x", get_instance(), get_bus(), addresses[i]);
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR[%u]: Found on bus %u ", get_instance(), get_bus());
         dev->set_device_type(uint8_t(DevType::VECTOR));
         set_bus_id(dev->get_bus_id());
 
