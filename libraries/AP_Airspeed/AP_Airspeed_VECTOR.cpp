@@ -13,10 +13,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-  backend driver for airspeed sensor from www.qio-tek.com
-  I2C ASP5033 sensor
- */
 
 #include "AP_Airspeed_VECTOR.h"
 
@@ -28,22 +24,13 @@
 extern const AP_HAL::HAL &hal;
 
 #define VECTOR_I2C_ADDR_1 0x28
-#define VECTOR_I2C_ADDR_2 0x40
-#define REG_SPEED_DATA 0x28
-#define REG_CMD 0x30
-#define REG_PRESS_DATA 0x06
-#define REG_TEMP_DATA 0x09
-#define REG_PART_ID 0x01
-#define REG_PART_ID_SET 0xa4
-#define REG_SENSOR_READY 0x08
-#define REG_WHOAMI_DEFAULT_ID 0X00
-#define REG_WHOAMI_RECHECK_ID 0X66
-#define CMD_MEASURE 0x0A
+#define REG_SPEED_DATA7BIT 0x28
+#define REG_SPEED_DATA8BIT 0x50
 
 bool AP_Airspeed_VECTOR::init()
 {
     // probe the sensor, supporting multiple possible I2C addresses
-    const uint8_t addresses[] = {VECTOR_I2C_ADDR_1, VECTOR_I2C_ADDR_2};
+    const uint8_t addresses[] = {VECTOR_I2C_ADDR_1};
     for (uint8_t address : addresses)
     {
         dev = hal.i2c_mgr->get_device(get_bus(), address);
@@ -70,17 +57,18 @@ bool AP_Airspeed_VECTOR::init()
 // read the data from the sensor
 void AP_Airspeed_VECTOR::timer()
 {
-    uint8_t status;
-    if (!dev->read_registers(REG_CMD, &status, 1) ||
-        (status & REG_SENSOR_READY) == 0)
-    {
-        // no data ready
-        return;
-    }
+    // uint8_t status;
+    //  if (!dev->read_registers(REG_SPE, &status, 1) ||
+    //      (status & REG_SENSOR_READY) == 0)
+    // {
+    // no data ready
+    //     GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Ei dataa");
+    //     return;
+    // }
 
     // read data
     uint8_t data[2];
-    if (!dev->read_registers(REG_SPEED_DATA, data, sizeof(data)))
+    if (!dev->read_registers(REG_SPEED_DATA7BIT, data, sizeof(data)))
     {
         return;
     }
@@ -89,6 +77,7 @@ void AP_Airspeed_VECTOR::timer()
     int16_t speed = (data[0] << 8) | data[1];
     GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data0 näyttää olevan %u ", data[0]);
     GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data1 näyttää olevan %u ", data[1]);
+    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data0+data1 on %u ", speed);
     const int16_t temp = (data[0] << 8) | data[1];
     WITH_SEMAPHORE(sem);
     speed_sum += speed;
