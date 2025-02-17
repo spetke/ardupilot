@@ -128,6 +128,7 @@ protected:
         NMEA     = 0x09,
         ASP5033  = 0x0A,
         AUAV     = 0x0B,
+        VECTOR   = 0x0C,
     };
     
 private:

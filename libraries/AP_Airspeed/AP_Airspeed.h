@@ -194,6 +194,7 @@ public:
         TYPE_AUAV_10IN=17,
         TYPE_AUAV_5IN=18,
         TYPE_AUAV_30IN=19,
+        TYPE_VECTOR=20,
         TYPE_SITL=100,
     };
 
