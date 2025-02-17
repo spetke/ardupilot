@@ -458,6 +458,11 @@ void AP_Airspeed::allocate()
             sensor[i] = NEW_NOTHROW AP_Airspeed_AUAV(*this, i, 30);
 #endif
             break;
+        case TYPE_VECTOR:
+#if AP_AIRSPEED_VECTOR_ENABLED
+            sensor[i] = NEW_NOTHROW AP_Airspeed_VECTOR(*this, i);
+#endif
+            break;
         }
         if (sensor[i] && !sensor[i]->init()) {
             GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "Airspeed %u init failed", i + 1);
