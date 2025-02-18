@@ -71,12 +71,8 @@ void AP_Airspeed_VECTOR::timer()
     {
         return;
     }
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Päästiin lukemaan nopeutta");
     // speed  is signed 16 bit
     int16_t speed = (data[0] << 8) | data[1];
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data0 näyttää olevan %u ", data[0]);
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data1 näyttää olevan %u ", data[1]);
-    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "VECTOR data0+data1 on %u ", speed);
     WITH_SEMAPHORE(sem);
 /*     speed_sum += speed;
     speed_count++;
@@ -91,12 +87,12 @@ bool AP_Airspeed_VECTOR::get_airspeed(float &airspeed)
 {
     WITH_SEMAPHORE(sem);
 
-    if (AP_HAL::millis() - last_sample_ms > 100)
+/*     if (AP_HAL::millis() - last_sample_ms > 100)
     {
         return false;
-    }
-        airspeed = last_speed;
-        return true;
+    } */
+    airspeed = last_speed;
+    return true;
 
 }
 // This has to be implemnted to fullfill  interface requirements for some reason
