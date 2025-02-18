@@ -19,7 +19,7 @@
 #if AP_AIRSPEED_VECTOR_ENABLED
 
 /*
-  backend driver for airspeed from I2C
+  backend driver for airspeed from I2C ye
  */
 #include "AP_Airspeed_Backend.h"
 
